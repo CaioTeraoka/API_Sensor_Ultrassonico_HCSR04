@@ -1,0 +1,5 @@
+../Core/Src/Ultrassonico.c:26:10:Medir_Distancia_CM	8	static
+../Core/Src/Ultrassonico.c:36:10:Medir_Distancia_INCH	8	static
+../Core/Src/Ultrassonico.c:46:6:Aproximacao	16	static
+../Core/Src/Ultrassonico.c:59:6:Alerta_Distancia	16	static
+../Core/Src/Ultrassonico.c:75:6:HAL_TIM_IC_CaptureCallback	16	static
