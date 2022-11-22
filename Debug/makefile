@@ -60,8 +60,8 @@ all: main-build
 main-build: API_Sensor_Ultrassonico.elf secondary-outputs
 
 # Tool invocations
-API_Sensor_Ultrassonico.elf API_Sensor_Ultrassonico.map: $(OBJS) $(USER_OBJS) C:\Users\Caio\Downloads\API_Sensor_Ultrassonico-main\ (oled3)\STM32F103RBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "API_Sensor_Ultrassonico.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\Caio\Downloads\API_Sensor_Ultrassonico-main (oled3)\STM32F103RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="API_Sensor_Ultrassonico.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -u _printf_float -u _scanf_float -Wl,--start-group -lc -lm -Wl,--end-group
+API_Sensor_Ultrassonico.elf API_Sensor_Ultrassonico.map: $(OBJS) $(USER_OBJS) /home/caio/Documentos/API_Sensor_Ultrassonico_HCSR04/STM32F103RBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "API_Sensor_Ultrassonico.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"/home/caio/Documentos/API_Sensor_Ultrassonico_HCSR04/STM32F103RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="API_Sensor_Ultrassonico.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -u _printf_float -u _scanf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

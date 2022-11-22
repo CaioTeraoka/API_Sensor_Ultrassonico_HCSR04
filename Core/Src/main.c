@@ -120,6 +120,10 @@ int main(void)
   {
 	  switch (funcao){
 	  case 0:
+	  		  Calibracao();
+	  		  break;
+
+	  case 1:
 		  while(funcao == 0){ // Neste caso ele irá medir a distância em centímetros e polegadas e então printar no display OLED
 			  distancia_cm = Medir_Distancia_CM();
 			  distancia_inch = Medir_Distancia_INCH();
@@ -132,9 +136,6 @@ int main(void)
 			  SSD1306_Puts (distancia_inch_str, &Font_7x10, 1);
 			  SSD1306_UpdateScreen(); // update display
 			  HAL_Delay(600);}
-		  break;
-	  case 1:
-		  Aproximacao();
 		  break;
 
 	  case 2:
