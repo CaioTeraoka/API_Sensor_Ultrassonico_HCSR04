@@ -1,5 +1,6 @@
-../Core/Src/Ultrassonico.c:27:10:Medir_Distancia_CM	16	static
-../Core/Src/Ultrassonico.c:38:10:Medir_Distancia_INCH	16	static
-../Core/Src/Ultrassonico.c:49:6:Calibracao	72	static
-../Core/Src/Ultrassonico.c:66:6:Alerta_Distancia	24	static
-../Core/Src/Ultrassonico.c:77:6:HAL_TIM_IC_CaptureCallback	16	static
+../Core/Src/Ultrassonico.c:28:10:Medir_Distancia_CM	16	static
+../Core/Src/Ultrassonico.c:40:10:Medir_Distancia_INCH	16	static
+../Core/Src/Ultrassonico.c:52:6:Calibracao	72	static
+../Core/Src/Ultrassonico.c:73:6:Alerta_Distancia	24	static
+../Core/Src/Ultrassonico.c:85:6:HAL_TIM_IC_CaptureCallback	16	static
+../Core/Src/Ultrassonico.c:125:10:kallman	40	static

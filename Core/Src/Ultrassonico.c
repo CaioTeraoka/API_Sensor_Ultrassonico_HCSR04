@@ -48,24 +48,25 @@ uint32_t Medir_Distancia_INCH(void){
 
 }
 
-
+//Função para calibração do sensor
 void Calibracao(void){
 	HAL_GPIO_WritePin(GPIOA, LED_1_Pin, 0);
 	HAL_GPIO_WritePin(GPIOA, LED_1_Pin, 1);
 	HAL_Delay(1000);
-	HAL_GPIO_WritePin(GPIOA, LED_1_Pin, 0);
+	HAL_GPIO_WritePin(GPIOA, LED_1_Pin, 0);		//O LED1 irá piscar uma vez para indicar o começo da amostragem
+	HAL_Delay(1000);
 	uint32_t medicao[10];
 	uint32_t dist = 10;
 	uint32_t somaY = 0 , somaX = 100 , somaQX = 1000, somaXY ;
-    for(int a = 0; a < 10; ++a){
+    for(int a = 0; a < 10; ++a){				//o loop serve para realizar 10 amostras da distância
         medicao[a] = Medir_Distancia_CM() - dist;
         somaY += medicao[a];
         somaXY = medicao[a]*10;
         HAL_Delay(60);
     }
-    a = ((somaY*somaQX)-(somaX*somaXY))/(10*somaQX - (somaX*somaX));
+    a = ((somaY*somaQX)-(somaX*somaXY))/(10*somaQX - (somaX*somaX)); //Calculo dos parâmetros para definição da distância correta
     b = (10*somaXY-(somaX*somaY))/(10*somaQX - (somaX*somaX));
-	HAL_GPIO_WritePin(GPIOA, LED_1_Pin, 1);
+	HAL_GPIO_WritePin(GPIOA, LED_1_Pin, 1);							//LED1 acende para indicar a finalização da calibração
 }
 
 //Recebe um valor de distância como parâmetro e quando o objeto estiver em uma distância menor um led irá acender como alerta
