@@ -22,31 +22,37 @@ uint8_t Primeira_Captura = 0; 							//Para saber se quando a interrupção for 
 uint32_t Distancia  = 0;								//Variável que indica a distância
 uint32_t Distancia_Real  = 0;
 uint32_t a = 0;
-uint32_t b = 0;									//Variável que nos diz o quanto o sensor está errando
+uint32_t b = 0;											//Variável que nos diz o quanto o sensor está errando
 
+//Vai retornar a distância medida em centímetros
 uint32_t Medir_Distancia_CM(void){
 	HAL_GPIO_WritePin(GPIOA, Trigger_Pin, 1); 			// Para acionar o sensor se deve gerar um pulso de duração de 10uS no pino Trigger
 	for(int x = 0; x < 40; ++x){} 						//delay de 10uS (O clock funciona a 40Mhz)
 	HAL_GPIO_WritePin(GPIOA, Trigger_Pin, 0);
-	__HAL_TIM_ENABLE_IT(&htim1, TIM_IT_CC1);			 //Habilita a interrupção para o timer 1, irá permitir a leitura da subida do Echo
+	__HAL_TIM_ENABLE_IT(&htim1, TIM_IT_CC1);			//Habilita a interrupção para o timer 1, irá permitir a leitura da subida do Echo
+	Distancia = kallman(Distancia);						//Filtragem do sinal
 	Distancia_Real = (Distancia - a)/(1+b);
-	return Distancia_Real; 							//Retorna a distância em centímetros
+	return Distancia_Real; 								//Retorna a distância em centímetros
 
-} 														//Vai retornar a distância medida em centímetros
+}
 
-
+//Vai retornar a distância em polegadas
 uint32_t Medir_Distancia_INCH(void){
 	HAL_GPIO_WritePin(GPIOA, Trigger_Pin, 1); 			// Para acionar o sensor se deve gerar um pulso de duração de 10uS no pino Trigger
 	for(int x = 0; x < 40; ++x){} 						//delay de 10uS (O clock funciona a 40Mhz)
 	HAL_GPIO_WritePin(GPIOA, Trigger_Pin, 0);
 	__HAL_TIM_ENABLE_IT(&htim1, TIM_IT_CC1); 			//Habilita a interrupção para o timer 1, irá permitir a leitura da subida do Echo
+	Distancia = kallman(Distancia);						//Filtragem do sinal
 	Distancia_Real = (Distancia - a)/(1+b);
-	return Distancia_Real/2.54; 							//Retorna a distância em polegadas
+	return Distancia_Real/2.54; 						//Retorna a distância em polegadas
 
-} 														//Vai retornar a distância em polegadas
+}
 
 
 void Calibracao(void){
+	HAL_GPIO_WritePin(GPIOA, LED_1_Pin, 0);
+	HAL_GPIO_WritePin(GPIOA, LED_1_Pin, 1);
+	HAL_Delay(1000);
 	HAL_GPIO_WritePin(GPIOA, LED_1_Pin, 0);
 	uint32_t medicao[10];
 	uint32_t dist = 10;
@@ -60,9 +66,9 @@ void Calibracao(void){
     a = ((somaY*somaQX)-(somaX*somaXY))/(10*somaQX - (somaX*somaX));
     b = (10*somaXY-(somaX*somaY))/(10*somaQX - (somaX*somaX));
 	HAL_GPIO_WritePin(GPIOA, LED_1_Pin, 1);
+}
 
-}														//
-
+//Recebe um valor de distância como parâmetro e quando o objeto estiver em uma distância menor um led irá acender como alerta
 void Alerta_Distancia(uint32_t dist){ 					//A função vai acontecer enquanto a variável funcao estiver em 2
 	uint32_t dist_atual = 0;
 	while(funcao == 2){
@@ -74,7 +80,8 @@ void Alerta_Distancia(uint32_t dist){ 					//A função vai acontecer enquanto a
 } 														//Recebe um valor de distância como parâmetro e quando o objeto estiver em uma distância menor um led irá acender como alerta
 
 
-void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) //Esta função serve para capturar o tempo de que Echo fica em nível lógico alto
+//Esta função serve para capturar o tempo de que Echo fica em nível lógico alto
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
 	if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)
 	{
@@ -112,3 +119,19 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) //Esta função serve p
 		}
 	}
 }
+
+//Filtro de Kallman para tratamento do sinal
+uint32_t kallman(uint32_t U){
+	  uint32_t R = 40;
+	  uint32_t H = 1.00;
+	  uint32_t Q = 10;
+	  uint32_t P = 0;
+	  uint32_t U_hat = 0;
+	  uint32_t K = 0;
+	  K = P*H/(H*P*H+R);
+	  U_hat += + K*(U-H*U_hat);
+	  P = (1-K*H)*P+Q;
+	  return U_hat;
+}
+
+

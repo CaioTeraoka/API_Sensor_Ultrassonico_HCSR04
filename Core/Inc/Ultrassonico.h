@@ -17,7 +17,7 @@
 uint32_t Medir_Distancia_CM(void); //Vai retornar a distância medida em centimétros
 uint32_t Medir_Distancia_INCH(void); //Vai retornar a distância em polegadas
 void Alerta_Distancia(uint32_t dist); //Recebe um valor de distância como parâmetro e quando o objeto estiver em uma distância menor um led irá acender como alerta
-void Calibracao(void);// Esta função tem como objetivo calibrar o sensor para uma medição mais fidedígna
-
+void Calibracao(void); // Esta função tem como objetivo calibrar o sensor para uma medição mais fidedígna
+uint32_t kallman(uint32_t U); //Filtro de Kallman para tratamento do sinal
 
 #endif
