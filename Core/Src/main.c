@@ -68,6 +68,7 @@ static void MX_I2C1_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 int funcao = 0;
+int calibrar = 0;
 /* USER CODE END 0 */
 
 /**
@@ -79,9 +80,11 @@ int main(void)
   /* USER CODE BEGIN 1 */
 	char distancia_cm_str[30];
 	char distancia_inch_str[30];
-	uint32_t distancia_cm = 0;
-	uint32_t distancia_inch = 0;
-	uint32_t distancia_limite_cm = 10;
+	float distancia_cm = 0;
+	float distancia_inch = 0;
+	float erro = 0;
+	float distancia_limite_cm = 10;
+
 
 
   /* USER CODE END 1 */
@@ -119,31 +122,34 @@ int main(void)
 
   {
 	  switch (funcao){
-	  case 0:
-	  		  Calibracao();
-	  		  break;
-
 	  case 1:
-		  while(funcao == 0){ // Neste caso ele irá medir a distância em centímetros e polegadas e então printar no display OLED
-			  distancia_cm = Medir_Distancia_CM();
+		  while(funcao == 1){ // Neste caso ele irá medir a distância em centímetros e polegadas e então printar no display OLED
+			  erro = retornar_erro();
+			  distancia_cm = Medir_Distancia_CM();;
 			  distancia_inch = Medir_Distancia_INCH();
-			  sprintf(distancia_cm_str, "D_cm: %.2lu cm",distancia_cm);
+			  sprintf(distancia_cm_str, "D_cm: %0.2f cm",distancia_cm);
 			  SSD1306_GotoXY (0,0);
 			  SSD1306_Puts (distancia_cm_str, &Font_7x10, 1);
 			  SSD1306_UpdateScreen(); // update display
-			  sprintf(distancia_inch_str, "D_inch: %.2lu inch",distancia_inch);
-			  SSD1306_GotoXY (0,30);
+			  sprintf(distancia_inch_str, "D_inch: %0.2f inch",distancia_inch);
+			  SSD1306_GotoXY (0,20);
 			  SSD1306_Puts (distancia_inch_str, &Font_7x10, 1);
 			  SSD1306_UpdateScreen(); // update display
-			  HAL_Delay(600);}
+			  sprintf(distancia_inch_str, "Erro: %0.4f ",erro);
+			  SSD1306_GotoXY (0,40);
+			  SSD1306_Puts (distancia_inch_str, &Font_7x10, 1);
+			  SSD1306_UpdateScreen(); // update display
+			  HAL_Delay(60);}
 		  break;
 
 	  case 2:
 		  Alerta_Distancia(distancia_limite_cm);
 		  break;
 
-	  default:
-		  funcao = 0;
+	  case 3:
+	  		  Calibracao(10);
+	  		  break;
+
 
 	  }
     /* USER CODE END WHILE */
@@ -344,7 +350,10 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, Trigger_Pin|LED_1_Pin|LED_2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, Trigger_Pin|LED_1_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(LED_2_GPIO_Port, LED_2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : Button_Pin */
   GPIO_InitStruct.Pin = Button_Pin;
@@ -352,14 +361,42 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(Button_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Trigger_Pin LED_1_Pin LED_2_Pin */
-  GPIO_InitStruct.Pin = Trigger_Pin|LED_1_Pin|LED_2_Pin;
+  /*Configure GPIO pins : Trigger_Pin LED_1_Pin */
+  GPIO_InitStruct.Pin = Trigger_Pin|LED_1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : B1_Pin B2_Pin */
+  GPIO_InitStruct.Pin = B1_Pin|B2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : LED_2_Pin */
+  GPIO_InitStruct.Pin = LED_2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LED_2_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : B3_Pin */
+  GPIO_InitStruct.Pin = B3_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(B3_GPIO_Port, &GPIO_InitStruct);
+
   /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI4_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_IRQn);
+
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
@@ -367,11 +404,18 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
-	if(GPIO_Pin == GPIO_PIN_13){
-		if(funcao < 2)
-		funcao++;
-		else
-		funcao = 0;}
+	if(GPIO_Pin == GPIO_PIN_1){
+		funcao = 1;
+	}
+	else if(GPIO_Pin == GPIO_PIN_4){
+		funcao = 2;
+	}
+	else if(GPIO_Pin == GPIO_PIN_0){
+		if(funcao == 3)
+			calibrar = 1;
+		if(funcao != 3){
+		funcao = 3;}
+		}
 }
 /* USER CODE END 4 */
 

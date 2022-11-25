@@ -60,12 +60,21 @@ void Error_Handler(void);
 #define Button_Pin GPIO_PIN_13
 #define Button_GPIO_Port GPIOC
 #define Button_EXTI_IRQn EXTI15_10_IRQn
-#define Trigger_Pin GPIO_PIN_1
-#define Trigger_GPIO_Port GPIOA
-#define LED_1_Pin GPIO_PIN_4
-#define LED_1_GPIO_Port GPIOA
+#define Trigger_Pin GPIO_PIN_0
+#define Trigger_GPIO_Port GPIOC
+#define LED_1_Pin GPIO_PIN_1
+#define LED_1_GPIO_Port GPIOC
+#define B1_Pin GPIO_PIN_1
+#define B1_GPIO_Port GPIOA
+#define B1_EXTI_IRQn EXTI1_IRQn
+#define B2_Pin GPIO_PIN_4
+#define B2_GPIO_Port GPIOA
+#define B2_EXTI_IRQn EXTI4_IRQn
 #define LED_2_Pin GPIO_PIN_5
 #define LED_2_GPIO_Port GPIOA
+#define B3_Pin GPIO_PIN_0
+#define B3_GPIO_Port GPIOB
+#define B3_EXTI_IRQn EXTI0_IRQn
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
