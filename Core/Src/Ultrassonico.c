@@ -13,25 +13,25 @@
 #include "main.h"
 #include "Ultrassonico.h"
 
-extern int funcao; 										// Variavel que diz qual função o projeto quer
-extern int calibrar;
+extern int funcao; 									// Variavel que diz qual função o projeto quer
+extern int calibrar;								//Variável que habilita a calibração
 extern TIM_HandleTypeDef htim1;
 float Time1 = 0; 									//Variável que marca o momento de subida do Echo
 float Time2 = 0; 									//Variável que marca o momento de descida do Echo
 float Diferenca = 0; 								//Variável que marca o tempo que o Echo ficou em nivel alto
-uint8_t Primeira_Captura = 0; 							//Para saber se quando a interrupção for chamada o sinal está em subida(0) ou descida(1)
+uint8_t Primeira_Captura = 0; 						//Para saber se quando a interrupção for chamada o sinal está em subida(0) ou descida(1)
 float Distancia  = 0;								//Variável que indica a distância
-float Distancia_Real  = 0;
-float erro = 0;											//Variável que nos diz o quanto o sensor está errando
+float Distancia_Real  = 0;							//Variável que indica a distância após a inclusão do erro de medição
+float erro = 0;										//Variável que nos diz o quanto o sensor está errando
 
 //Vai retornar a distância medida em centímetros
 float Medir_Distancia_CM(void){
-	HAL_GPIO_WritePin(GPIOC, Trigger_Pin, 1); 			// Para acionar o sensor se deve gerar um pulso de duração de 10uS no pino Trigger
-	for(int x = 0; x < 40; ++x){} 						//delay de 10uS (O clock funciona a 40Mhz)
+	HAL_GPIO_WritePin(GPIOC, Trigger_Pin, 1); 		// Para acionar o sensor se deve gerar um pulso de duração de 10uS no pino Trigger
+	for(int x = 0; x < 40; ++x){} 					//delay de 10uS (O clock funciona a 40Mhz)
 	HAL_GPIO_WritePin(GPIOC, Trigger_Pin, 0);
-	__HAL_TIM_ENABLE_IT(&htim1, TIM_IT_CC1);			//Habilita a interrupção para o timer 1, irá permitir a leitura da subida do Echo
+	__HAL_TIM_ENABLE_IT(&htim1, TIM_IT_CC1);		//Habilita a interrupção para o timer 1, irá permitir a leitura da subida do Echo
 	Distancia_Real = Distancia + erro;
-	return Distancia_Real; 								//Retorna a distância em centímetros
+	return Distancia_Real;
 
 }
 
@@ -46,7 +46,7 @@ float Medir_Distancia_INCH(void){
 	HAL_GPIO_WritePin(GPIOC, Trigger_Pin, 0);
 	__HAL_TIM_ENABLE_IT(&htim1, TIM_IT_CC1); 			//Habilita a interrupção para o timer 1, irá permitir a leitura da subida do Echo
 	Distancia_Real = Distancia + erro;
-	return Distancia_Real/2.54; 						//Retorna a distância em polegadas
+	return Distancia_Real/2.54; 						//Conversão para polegadas
 
 }
 
@@ -76,13 +76,11 @@ void Calibracao(float dist){
 //Recebe um valor de distância como parâmetro e quando o objeto estiver em uma distância menor um led irá acender como alerta
 void Alerta_Distancia(float dist){
 	float dist_atual = 0;
-	//while(funcao == 2){ //A função vai acontecer enquanto a variável funcao estiver em 2
-	dist_atual = Medir_Distancia_CM(); 					//Mede a distancia atual
-	if (dist_atual < dist) HAL_GPIO_WritePin(GPIOA, LED_2_Pin, 1); //Condicional para decisao se acende o led ou não
+	dist_atual = Medir_Distancia_CM(); 								//Mede a distancia atual
+	if (dist_atual < dist) HAL_GPIO_WritePin(GPIOA, LED_2_Pin, 1);  //Condicional para decisão se acende o led ou não
 	else HAL_GPIO_WritePin(GPIOA, LED_2_Pin, 0);
-	HAL_Delay(60); 										//delay de 60ms indicado pelo fabricante do sensor entre uma medição e outra
-	//}
-} 														//Recebe um valor de distância como parâmetro e quando o objeto estiver em uma distância menor um led irá acender como alerta
+	HAL_Delay(60); 													//delay de 60ms indicado pelo fabricante do sensor entre uma medição e outra
+}
 
 
 //Esta função serve para capturar o tempo de que Echo fica em nível lógico alto
