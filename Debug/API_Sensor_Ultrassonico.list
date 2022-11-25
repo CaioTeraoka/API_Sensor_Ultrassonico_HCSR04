@@ -1512,20 +1512,20 @@ Disassembly of section .text:
 
 08001180 <Medir_Distancia_CM>:
 float Distancia  = 0;								//Variável que indica a distância
-float Distancia_Real  = 0;
-float erro = 0;											//Variável que nos diz o quanto o sensor está errando
+float Distancia_Real  = 0;							//Variável que indica a distância após a inclusão do erro de medição
+float erro = 0;										//Variável que nos diz o quanto o sensor está errando
 
 //Vai retornar a distância medida em centímetros
 float Medir_Distancia_CM(void){
  8001180:	b580      	push	{r7, lr}
  8001182:	b082      	sub	sp, #8
  8001184:	af00      	add	r7, sp, #0
-	HAL_GPIO_WritePin(GPIOC, Trigger_Pin, 1); 			// Para acionar o sensor se deve gerar um pulso de duração de 10uS no pino Trigger
+	HAL_GPIO_WritePin(GPIOC, Trigger_Pin, 1); 		// Para acionar o sensor se deve gerar um pulso de duração de 10uS no pino Trigger
  8001186:	2201      	movs	r2, #1
  8001188:	2101      	movs	r1, #1
  800118a:	4815      	ldr	r0, [pc, #84]	; (80011e0 <Medir_Distancia_CM+0x60>)
  800118c:	f001 fc68 	bl	8002a60 <HAL_GPIO_WritePin>
-	for(int x = 0; x < 40; ++x){} 						//delay de 10uS (O clock funciona a 40Mhz)
+	for(int x = 0; x < 40; ++x){} 					//delay de 10uS (O clock funciona a 40Mhz)
  8001190:	2300      	movs	r3, #0
  8001192:	607b      	str	r3, [r7, #4]
  8001194:	e002      	b.n	800119c <Medir_Distancia_CM+0x1c>
@@ -1540,7 +1540,7 @@ float Medir_Distancia_CM(void){
  80011a4:	2101      	movs	r1, #1
  80011a6:	480e      	ldr	r0, [pc, #56]	; (80011e0 <Medir_Distancia_CM+0x60>)
  80011a8:	f001 fc5a 	bl	8002a60 <HAL_GPIO_WritePin>
-	__HAL_TIM_ENABLE_IT(&htim1, TIM_IT_CC1);			//Habilita a interrupção para o timer 1, irá permitir a leitura da subida do Echo
+	__HAL_TIM_ENABLE_IT(&htim1, TIM_IT_CC1);		//Habilita a interrupção para o timer 1, irá permitir a leitura da subida do Echo
  80011ac:	4b0d      	ldr	r3, [pc, #52]	; (80011e4 <Medir_Distancia_CM+0x64>)
  80011ae:	681b      	ldr	r3, [r3, #0]
  80011b0:	68da      	ldr	r2, [r3, #12]
@@ -1560,7 +1560,7 @@ float Medir_Distancia_CM(void){
  80011ce:	461a      	mov	r2, r3
  80011d0:	4b07      	ldr	r3, [pc, #28]	; (80011f0 <Medir_Distancia_CM+0x70>)
  80011d2:	601a      	str	r2, [r3, #0]
-	return Distancia_Real; 								//Retorna a distância em centímetros
+	return Distancia_Real;
  80011d4:	4b06      	ldr	r3, [pc, #24]	; (80011f0 <Medir_Distancia_CM+0x70>)
  80011d6:	681b      	ldr	r3, [r3, #0]
 
@@ -1637,7 +1637,7 @@ float Medir_Distancia_INCH(void){
  8001256:	461a      	mov	r2, r3
  8001258:	4b11      	ldr	r3, [pc, #68]	; (80012a0 <Medir_Distancia_INCH+0x98>)
  800125a:	601a      	str	r2, [r3, #0]
-	return Distancia_Real/2.54; 						//Retorna a distância em polegadas
+	return Distancia_Real/2.54; 						//Conversão para polegadas
  800125c:	4b10      	ldr	r3, [pc, #64]	; (80012a0 <Medir_Distancia_INCH+0x98>)
  800125e:	681b      	ldr	r3, [r3, #0]
  8001260:	4618      	mov	r0, r3
@@ -1780,11 +1780,10 @@ void Alerta_Distancia(float dist){
 	float dist_atual = 0;
  8001364:	f04f 0300 	mov.w	r3, #0
  8001368:	60fb      	str	r3, [r7, #12]
-	//while(funcao == 2){ //A função vai acontecer enquanto a variável funcao estiver em 2
-	dist_atual = Medir_Distancia_CM(); 					//Mede a distancia atual
+	dist_atual = Medir_Distancia_CM(); 								//Mede a distancia atual
  800136a:	f7ff ff09 	bl	8001180 <Medir_Distancia_CM>
  800136e:	60f8      	str	r0, [r7, #12]
-	if (dist_atual < dist) HAL_GPIO_WritePin(GPIOA, LED_2_Pin, 1); //Condicional para decisao se acende o led ou não
+	if (dist_atual < dist) HAL_GPIO_WritePin(GPIOA, LED_2_Pin, 1);  //Condicional para decisão se acende o led ou não
  8001370:	6879      	ldr	r1, [r7, #4]
  8001372:	68f8      	ldr	r0, [r7, #12]
  8001374:	f7ff fea4 	bl	80010c0 <__aeabi_fcmplt>
@@ -1801,11 +1800,10 @@ void Alerta_Distancia(float dist){
  800138c:	2120      	movs	r1, #32
  800138e:	4805      	ldr	r0, [pc, #20]	; (80013a4 <Alerta_Distancia+0x48>)
  8001390:	f001 fb66 	bl	8002a60 <HAL_GPIO_WritePin>
-	HAL_Delay(60); 										//delay de 60ms indicado pelo fabricante do sensor entre uma medição e outra
+	HAL_Delay(60); 													//delay de 60ms indicado pelo fabricante do sensor entre uma medição e outra
  8001394:	203c      	movs	r0, #60	; 0x3c
  8001396:	f001 f8ad 	bl	80024f4 <HAL_Delay>
-	//}
-} 														//Recebe um valor de distância como parâmetro e quando o objeto estiver em uma distância menor um led irá acender como alerta
+}
  800139a:	bf00      	nop
  800139c:	3710      	adds	r7, #16
  800139e:	46bd      	mov	sp, r7
