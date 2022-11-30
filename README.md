@@ -28,7 +28,7 @@ This API contains functions to provide use of some hardware resources from HC-SR
  - HC-SR04 ultrasonic sensor datasheet: https://pdf1.alldatasheet.com/datasheet-pdf/view/1132203/ETC2/HC-SR04.html
 
 ## Default pinout:
-![HCSR04](HCSR04.jpg)
+![HCSR04](ultrassonico.jpeg)
 | PIN | STM32F103RB LABELS | Description |
 |---|---|---|
 | VCC | 3~5V | Powers the sensor |
